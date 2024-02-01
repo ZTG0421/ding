@@ -16,7 +16,7 @@ def playDingSound():
 
 def listen(listen_address):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('0.0.0.0', 90))
+    server.bind(listen_address)
     server.listen()
     print('等待连接')
     client, addr = server.accept()

@@ -1,7 +1,7 @@
 import socket
 import threading
 import time
-
+import re
 import keyboard
 import winsound
 
@@ -15,7 +15,7 @@ def playDingSound():
 
 
 def connect_to_server(server_address):
-    print('trying to connect to {}'.format(server_address))
+    print('connecting to {}...'.format(server_address))
     # 循环try
     while True:
         try:
@@ -27,7 +27,7 @@ def connect_to_server(server_address):
             continue
         else:
             break
-    print('OK')
+    print('OK  CONNECTED WITH {}',server_address)
     return client
 
 
@@ -35,15 +35,24 @@ def connect_to_server(server_address):
 def receive_ding(sock):
     while True:
         rec = sock.recv(1024)
-        print('recv:' + rec.decode('utf-8'))
-        if rec.decode('utf-8') == 'ding':
+        #当前毫秒时间戳 整数
+        current_time=int(round(time.time(),4)*10000)
+        rec=rec.decode('utf-8')
+        result = re.findall(r'[a-zA-Z]+', rec)
+        rec_time = re.findall(r'\d+', rec)
+        #对方毫秒时间戳 整数
+        rec_time=int(rec_time[0])
+        result = result[0]
+        if result == 'ding':
+            print('ding/'+str(current_time-rec_time)+'ms')
             threading.Thread(target=playDingSound).start()
 
 
 def send_ding(sock):
     while True:
         keyboard.wait('w')
-        sock.send('ding'.encode('utf-8'))
+        presend='ding'+str(int(round(time.time(),4)*10000))
+        sock.send(presend.encode('utf-8'))
         # 0.5s保护
         time.sleep(1)
 
